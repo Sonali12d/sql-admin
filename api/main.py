@@ -1515,9 +1515,9 @@ async def get_job_status(job_id: str,
         )
     
     # Get job status
-    status = redis_service.get_job_status(job_id)
+    job_status = redis_service.get_job_status(job_id)
     
-    if not status:
+    if not job_status:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Job not found or expired"
@@ -1525,11 +1525,11 @@ async def get_job_status(job_id: str,
     
     response = {
         "job_id": job_id,
-        "status": status
+        "status": job_status
     }
     
     # If completed, get the result
-    if status == "completed":
+    if job_status == "completed":
         result = redis_service.get_job_result(job_id)
         
         if result:
@@ -1585,11 +1585,11 @@ async def get_job_result(job_id: str,
     result = redis_service.get_job_result(job_id)
     
     if not result:
-        status = redis_service.get_job_status(job_id)
-        if status == "queued" or status == "processing":
+        job_status = redis_service.get_job_status(job_id)
+        if job_status == "queued" or job_status == "processing":
             raise HTTPException(
                 status_code=status.HTTP_202_ACCEPTED,
-                detail=f"Job still {status}, please wait"
+                detail=f"Job still {job_status}, please wait"
             )
         else:
             raise HTTPException(
